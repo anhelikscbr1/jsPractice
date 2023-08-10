@@ -44,12 +44,15 @@ maxPrice.addEventListener('change', (e)=>{
 })
 transmition.addEventListener('change', (e)=>{
     search.transmition = e.target.value;
+    filterCar();
 })
 doors.addEventListener('change', (e)=>{
     search.doors = e.target.value;
+    filterCar();
 })
 color.addEventListener('change', (e)=>{
     search.color = e.target.value;
+    filterCar();
     console.log(search);
 })
 
@@ -76,10 +79,19 @@ function fillSelect(){
 
 function filterCar(){
     const res = autos.filter(brandFilter). filter(yearFilter) .filter(minFilter)
-                .filter(maxFilter);
+                .filter(maxFilter).filter(transmitionFilter) .filter(colorFilter)
+                .filter(doorsFilter);
     console.log(res);
     cleanCars();
-    showCars(res);
+    if (Object.keys(res).length){
+        console.log("more than one");
+        showCars(res);
+    } else{
+        const noCars = document.createElement('P');
+        noCars.textContent = "No vehicules aviable"
+        noCars.classList.add('error');
+        result.appendChild(noCars);
+    }
 }
 
 function brandFilter(car){
@@ -114,4 +126,19 @@ function cleanCars(){
     while(result.firstChild){
         result.removeChild(result.firstChild);
     }
+}
+
+function transmitionFilter(car){
+    if(search.transmition) return car.transmision === search.transmition
+    return car;
+}
+
+function colorFilter(car){
+    if(search.color) return car.color === search.color
+    return car;
+}
+
+function doorsFilter(car){
+    if(search.doors) return car.puertas === parseInt(search.doors);
+    return car;
 }
