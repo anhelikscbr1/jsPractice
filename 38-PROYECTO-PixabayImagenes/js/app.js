@@ -1,8 +1,11 @@
 const result = document.querySelector('#resultado');
 const form = document.querySelector('#formulario');
+const pagintation = document.querySelector('#paginacion');
 
 const perPage = 40;
 let totalPages;
+let iterator;
+let actPag = 1;
 
 document.addEventListener('DOMContentLoaded', ()=>{
     form.addEventListener('submit', validateForm);
@@ -18,7 +21,7 @@ function validateForm(e){
         return;
     }
 
-    searchImgs(search);
+    searchImgs();
 }
 
 function showAlert(msj){
@@ -40,9 +43,12 @@ function showAlert(msj){
     }
 }
 
-function searchImgs(search){
+function searchImgs(){
+
+    const lsearch = document.querySelector('#termino').value;
+
     const key = '39158248-3c32a5bfd508fd7c5bad5c254';
-    const url = `https://pixabay.com/api/?key=${key}&q=${search}&per_page=${perPage}`;
+    const url = `https://pixabay.com/api/?key=${key}&q=${lsearch}&per_page=${perPage}&page=${actPag}`;
 
     fetch(url)
         .then(Response => Response.json())
@@ -51,6 +57,12 @@ function searchImgs(search){
             paintImages(result.hits);
         })
 
+}
+
+function *createPaginator(total){
+    for (let i=1; i<=total; i++){
+        yield i;
+    }
 }
 
 function paintImages(images){
@@ -79,11 +91,37 @@ function paintImages(images){
             </div>
 
         `
-
-        
     });
+    //Clean the pagionation
+    while(pagintation.firstChild){
+        pagintation.removeChild(pagintation.firstChild);
+    }
+    //Pain the pagination
+    paintPaginator();
 }
 
 function calcPages(total){
     return parseInt (Math.ceil (total/perPage));
+}
+
+function paintPaginator(){
+    iterator = createPaginator(totalPages);
+
+    while(true){
+        const {value, done } = iterator.next();
+        if(done) return;
+
+        const btn = document.createElement('A');
+        btn.href = '#';
+        btn.textContent = value;
+        btn.classList.add('siguiente', 'bg-yellow-400', 'px-4', 'py-1', 'mr-2', 'font-bold', 'mb-10', 'uppercase', 'rounded');
+         
+        btn.onclick = ()=>{
+            actPag = value;
+            searchImgs();
+
+        };
+
+        pagintation.appendChild(btn);
+    }
 }
