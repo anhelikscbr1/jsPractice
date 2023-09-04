@@ -1,5 +1,5 @@
+let DB;
 (function (){
-    let DB;
     const form = document.querySelector('#formulario');
 
     document.addEventListener('DOMContentLoaded', ()=>{
@@ -7,18 +7,6 @@
     
         form.addEventListener('submit', validateClient );
     });
-
-    function connectDB(){
-        const openCon = window.indexedDB.open('crm', 1);
-
-        openCon.onerror = function(){
-            console.log('No connection to DB');
-        };
-
-        openCon.onsuccess = function(){
-            DB = openCon.result;
-        };
-    }
 
     function validateClient(e){
         e.preventDefault();
@@ -33,33 +21,28 @@
         }
 
         const client = {uName, uTel, uEmail, uEnterprise, id: Date.now()};
-        console.log(client);
 
+        createNewClient(client);
     }
 
-    function showAlert(msj, type){
+    function createNewClient(client){
+        const transaction = DB.transaction( ('crm'), 'readwrite');
 
-        const alert = document.querySelector('.alert');
+        const objectStore = transaction.objectStore('crm');
 
-        if(alert){
-            return;
+        objectStore.add(client);
+
+        transaction.onerror = function(){
+            console.log('Error on adding a client');
         }
-        const divMsj = document.createElement('DIV');
-        divMsj.textContent  = msj;
-        divMsj.classList.add('px-4', 'py-3', 'rounded', 'max-w-lg', 'mx-auto', 'mt-6', 'text-center', 'border', 'alert');
 
-        if( type === 'error'){
-            divMsj.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-        }else{
-            divMsj.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+        transaction.oncomplete = function(){
+            showAlert('The client added correctly');
+            form.reset();
+
+            setTimeout(()=>{
+                window.location.href = 'index.html';
+            },1000);
         }
-        form.appendChild(divMsj);
-
-        setTimeout( ()=>{
-            divMsj.remove();
-        }, 3000);
     }
-
-    
-
 })();
